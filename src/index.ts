@@ -10,8 +10,8 @@ const bikeId = app.registerBike(bike)
 console.log(app.bikes)
 const user1 = new User('Jose', 'jose@mail.com', '1234')
 const user2 = new User('Maria', 'maria@mail.com', '1234')
-app.registerUser(user1)
-app.registerUser(user2)
+app.registerUser(user1, '1234')
+app.registerUser(user2, '123456')
 
 const yesterday = new Date()
 yesterday.setDate(yesterday.getDate() - 1)
@@ -25,8 +25,12 @@ twoDaysFromToday.setDate(twoDaysFromToday.getDate() + 3)
 
 app.rentBike(bikeId, 'jose@mail.com', yesterday, today)
 
-console.log('Antes do retorno', app.rents)
+//console.log('Antes do retorno', app.rents)
 
 app.returnBike(bikeId, 'jose@mail.com')
 
-console.log('Depois do retorno', app.rents)
+//console.log('Depois do retorno', app.rents)
+
+app.listBikes()
+app.listRents()
+app.listUsers()
