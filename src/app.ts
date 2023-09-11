@@ -47,32 +47,34 @@ export class App {
     rentBike(bikeId: string, userEmail: string, startDate: Date, endDate: Date): void {
         const bike = this.bikes.find(bike => bike.id === bikeId)
         if (!bike) {
-            throw new Error('Bike not found.')
+            throw new Error('Bike does not exist.')
         }
-        const user = this.findUser(userEmail)
+        const user = this.users.find(user => user.email === userEmail)
         if (!user) {
-            throw new Error('User not found.')
+            throw new Error('User does not exist.')
         }
-        const bikeRents = this.rents.filter(rent =>
-            rent.bike.id === bikeId && !rent.dateReturned
-        )
-        const newRent = Rent.create(bikeRents, bike, user, startDate, endDate)
-        this.rents.push(newRent)
+        const rent = Rent.create(this.rents, bike, user, startDate, endDate)
+        this.rents.push(rent)
+        bike.isAvailable = false
     }
 
-    returnBike(bikeId: string, userEmail: string) {
-        const today = new Date()
-        const rent = this.rents.find(rent => 
-            rent.bike.id === bikeId &&
-            rent.user.email === userEmail &&
-            rent.dateReturned === undefined &&
-            rent.dateFrom <= today
-        )
-        if (rent) {
-            rent.dateReturned = today
-            return
+    returnBike(bikeId: string, userEmail: string, dateReturned: Date): number {
+        const bike = this.bikes.find(bike => bike.id === bikeId)
+        if (!bike) {
+            throw new Error('Bike does not exist.')
         }
-        throw new Error('Rent not found.')
+        const user = this.users.find(user => user.email === userEmail)
+        if (!user) {
+            throw new Error('User does not exist.')
+        }
+        const rent = this.rents.find(rent => rent.bike.id === bikeId && rent.user.email === userEmail)
+        if (!rent) {
+            throw new Error('Rent does not exist.')
+        }
+        rent.dateReturned = dateReturned
+        bike.isAvailable = true
+        const hours = Math.ceil((dateReturned.getTime() - rent.hourFrom.getTime()) / (1000 * 60 * 60))
+        return hours * bike.rate
     }
 
     listBikes(): void {

@@ -5,24 +5,22 @@ export class Rent {
     private constructor(
         public bike: Bike,
         public user: User,
-        public dateFrom: Date,
-        public dateTo: Date,
+        public hourFrom: Date,
+        public hourTo: Date,
         public dateReturned?: Date
     ) {}
 
-    static create(rents: Rent[], bike: Bike, user: User, 
-                  startDate: Date, endDate: Date): Rent {
-        const canCreate = Rent.canRent(rents, startDate, endDate)
-        if (canCreate) return new Rent(bike, user, startDate, endDate)
-        throw new Error('Overlapping dates.')
+    static create(rents: Rent[], bike: Bike, user: User, startDate: Date, endDate: Date): Rent {
+        const rent = new Rent(bike, user, startDate, endDate)
+        const rentIndex = rents.findIndex(rent => rent.bike.id === bike.id && rent.user.email === user.email)
+        if (rentIndex !== -1) {
+            throw new Error('Rent already exists.')
+        }
+        return rent
     }
 
-    static canRent(rents: Rent[], startDate: Date, endDate: Date): boolean {
-        for (const rent of rents) {
-            if (startDate <= rent.dateTo && endDate >= rent.dateFrom) {
-                return false
-            }
-        }
-        return true
+    static canRent(rents: Rent[], bike: Bike): boolean {
+        const rentIndex = rents.findIndex(rent => rent.bike.id === bike.id && !rent.dateReturned)
+        return rentIndex === -1
     }
 }
