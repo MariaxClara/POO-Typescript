@@ -12,47 +12,62 @@ export class App {
         return this.users.find(user => user.email === email)
     }
 
-    registerUser(user: User): void {
+    registerUser(user: User): string {
         for (const rUser of this.users) {
             if (rUser.email === user.email) {
                 throw new Error('Duplicate user.')
             }
         }
-        user.id = crypto.randomUUID()
+        const newId = crypto.randomUUID()
+        user.id = newId
         this.users.push(user)
+        return newId
     }
 
-    registerBike(bike: Bike): void {
-        for (const rBike of this.bikes) {
-            if (rBike.id === bike.id) {
-                throw new Error('Duplicate bike.')
-            }
-        }
-        bike.id = crypto.randomUUID()
+    registerBike(bike: Bike): string {
+        const newId = crypto.randomUUID()
+        bike.id = newId
         this.bikes.push(bike)
+        return newId
     }
 
     removeUser(email: string): void {
-        const user = this.findUser(email)
-        if (user) {
-            this.users.splice(this.users.indexOf(user), 1)
+        const userIndex = this.users.findIndex(user => user.email === email)
+        if (userIndex !== -1) {
+            this.users.splice(userIndex, 1)
+            return
         }
+        throw new Error('User does not exist.')
+    }
+    
+    rentBike(bikeId: string, userEmail: string, startDate: Date, endDate: Date): void {
+        const bike = this.bikes.find(bike => bike.id === bikeId)
+        if (!bike) {
+            throw new Error('Bike not found.')
+        }
+        const user = this.findUser(userEmail)
+        if (!user) {
+            throw new Error('User not found.')
+        }
+        const bikeRents = this.rents.filter(rent =>
+            rent.bike.id === bikeId && !rent.dateReturned
+        )
+        const newRent = Rent.create(bikeRents, bike, user, startDate, endDate)
+        this.rents.push(newRent)
     }
 
-    rentBike(rent: Rent): void {
-        const canRent = Rent.canRent(this.rents, rent.dateFrom, rent.dateTo)
-        if (canRent) {
-            this.rents.push(rent)
-        } else {
-            throw new Error('Overlapping dates.')
-        }
-    }
-
-    returnBike(bike: Bike, user: User): void {
-        const rent = this.rents.find(rent => rent.bike.id === bike.id && rent.user.id === user.id)
+    returnBike(bikeId: string, userEmail: string) {
+        const today = new Date()
+        const rent = this.rents.find(rent => 
+            rent.bike.id === bikeId &&
+            rent.user.email === userEmail &&
+            rent.dateReturned === undefined &&
+            rent.dateFrom <= today
+        )
         if (rent) {
-            rent.dateReturned = new Date()
+            rent.dateReturned = today
+            return
         }
+        throw new Error('Rent not found.')
     }
 }
-

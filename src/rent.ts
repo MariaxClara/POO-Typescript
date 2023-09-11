@@ -26,4 +26,3 @@ export class Rent {
         return true
     }
 }
-
