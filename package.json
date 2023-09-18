@@ -13,6 +13,7 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "sinon": "^16.0.0"
   }
 }
