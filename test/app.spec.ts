@@ -131,6 +131,7 @@ describe('App', () => {
         await app.registerBike(bike)
         await expect(app.returnBike(bike.id, user.email))
             .rejects.toThrow(RentNotFoundError)
+    })
 
     it ('should correctly register user', async () => {
         const app = new App(userRepo, bikeRepo, rentRepo)
