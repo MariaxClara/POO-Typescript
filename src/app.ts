@@ -8,6 +8,7 @@ import { RentNotFoundError } from "./errors/rent-not-found-error";
 import { UnavailableBikeError } from "./errors/unavailable-bike-error";
 import { UserNotFoundError } from "./errors/user-not-found-error";
 import { DuplicateUserError } from "./errors/duplicate-user-error";
+import { UserWithOpenRentError } from "./errors/user-with-open-rent-error";
 import { RentRepo } from "./ports/rent-repo";
 import { UserRepo } from "./ports/user-repo";
 import { BikeRepo } from "./ports/bike-repo";
@@ -46,7 +47,10 @@ export class App {
     }
 
     async removeUser(email: string): Promise<void> {
-        await this.findUser(email)
+        const open = await this.rentRepo.findOpenRentsFor(email)
+        if (open.length > 0) {
+            throw new UserWithOpenRentError()
+        }
         await this.userRepo.remove(email)
     }
     
